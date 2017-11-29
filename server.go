@@ -8,14 +8,25 @@ import (
 
 	"github.com/ACollectionOfAtoms/foodbot/bot"
 	"github.com/nlopes/slack"
+	"googlemaps.github.io/maps"
 )
 
 var slackAPIKey = os.Getenv("SLACK_API_KEY")
+var googleMapsAPIKey = os.Getenv("GOOGLE_MAPS_API_KEY")
+
+func googleMapsClient(apiKey string) *maps.Client {
+	c, err := maps.NewClient(maps.WithAPIKey(apiKey))
+	if err != nil {
+		log.Fatalf("fatal error: %s", err)
+	}
+	return c
+}
 
 func main() {
 	var BotID string
-	// the string here is a channel ID :D
-	bots := make(map[string]bot.Bot)
+	// the string here is a channel ID lmao (fix this to be more explicit)
+	bots := make(map[string]*bot.Bot)
+	gcClient := googleMapsClient(googleMapsAPIKey)
 
 	api := slack.New(slackAPIKey)
 	logger := log.New(os.Stdout, "slack-bot: ", log.Lshortfile|log.LstdFlags)
@@ -35,14 +46,15 @@ func main() {
 			channelID := ev.Channel.ID
 			channelName := ev.Channel.Name
 			message := fmt.Sprintf("Yes hello, #%s. Eh, where am I?", channelName)
-			bots[channelID] = bot.Bot{}
+			bots[channelID] = &bot.Bot{
+				GcClient: gcClient,
+			}
 			rtm.SendMessage(rtm.NewOutgoingMessage(message, channelID))
 
 		case *slack.MessageEvent:
-			fmt.Println(bots)
 			channel := ev.Msg.Channel
 			if _, in := bots[channel]; !in {
-				bots[channel] = bot.Bot{}
+				bots[channel] = &bot.Bot{}
 			}
 			b := bots[channel]
 			incomingMessage := ev.Msg.Text
@@ -51,6 +63,7 @@ func main() {
 				message := b.Parse(incomingMessage)
 				go rtm.SendMessage(rtm.NewOutgoingMessage(message, channel))
 			}
+
 		case *slack.PresenceChangeEvent:
 			fmt.Printf("Presence Change: %v\n", ev)
 
