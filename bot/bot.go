@@ -3,6 +3,7 @@ package bot
 import (
 	"fmt"
 	"math/rand"
+	"regexp"
 	"strings"
 	"time"
 
@@ -29,12 +30,27 @@ func randomResponse() string {
 	return randomdResponses[randResponseIndex]
 }
 
+func parseTheBest(s string) string {
+	// parse everythign after "the best" in a string
+	parsedString := ""
+	re := regexp.MustCompile("(the best).*")
+	match := re.FindString(s)
+	if len(match) == 0 {
+		return parsedString
+	}
+	parsedString = strings.TrimPrefix(match, "the best")
+	return parsedString
+}
+
 // Parse string for further processings
 func (b *Bot) Parse(s string) string {
 	response := randomResponse()
 	b.SetLocation(b.Location) // TODO: only do this when asked
 	if strings.Contains(s, `where are you`) {
 		response = fmt.Sprintf("I am currently in %s", b.Location)
+	}
+	if strings.Contains(s, "the best") {
+
 	}
 	return response
 }
