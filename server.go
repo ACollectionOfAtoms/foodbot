@@ -13,6 +13,7 @@ import (
 
 var slackAPIKey = os.Getenv("SLACK_API_KEY")
 var googleMapsAPIKey = os.Getenv("GOOGLE_MAPS_API_KEY")
+var latLngLocation = "40.700879,-73.987410"
 
 func googleMapsClient(apiKey string) *maps.Client {
 	c, err := maps.NewClient(maps.WithAPIKey(apiKey))
@@ -44,17 +45,18 @@ func main() {
 
 		case *slack.ChannelJoinedEvent:
 			channelID := ev.Channel.ID
-			channelName := ev.Channel.Name
-			message := fmt.Sprintf("Yes hello, #%s. Eh, where am I?", channelName)
 			bots[channelID] = &bot.Bot{
-				GcClient: gcClient,
+				GcClient: *gcClient,
+				Location: latLngLocation,
 			}
-			rtm.SendMessage(rtm.NewOutgoingMessage(message, channelID))
 
 		case *slack.MessageEvent:
 			channel := ev.Msg.Channel
 			if _, in := bots[channel]; !in {
-				bots[channel] = &bot.Bot{}
+				bots[channel] = &bot.Bot{
+					GcClient: *gcClient,
+					Location: latLngLocation,
+				}
 			}
 			b := bots[channel]
 			incomingMessage := ev.Msg.Text
