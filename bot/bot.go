@@ -44,6 +44,7 @@ func parseEverythingAfter(s, prefix string) string {
 		return parsedString
 	}
 	parsedString = strings.TrimPrefix(match, prefix)
+	parsedString = strings.TrimSpace(parsedString)
 	return parsedString
 }
 
@@ -73,7 +74,7 @@ func queryGoogleMaps(query string, b *Bot, ranking maps.RankBy) string {
 	} else if ranking == maps.RankByProminence {
 		req = &maps.NearbySearchRequest{
 			Location: &b.LatLong,
-			Radius:   uint(200),
+			Radius:   uint(200), // required for RankByProminence
 			Keyword:  query,
 			MinPrice: minPrice,
 			MaxPrice: maxPrice,
@@ -126,8 +127,8 @@ func randomFoodType() string {
 
 // Parse string for further processings
 func (b *Bot) Parse(s string) string {
-	s = strings.TrimSpace(s)
 	s = strings.ToLower(s)
+	s = strings.TrimSpace(s)
 	response := randomResponse()
 	b.SetLocation(b.Location) // TODO: only do this when asked
 	placeName := ""
@@ -145,7 +146,7 @@ func (b *Bot) Parse(s string) string {
 		placeName = queryGoogleMaps(query, b, maps.RankByDistance)
 		response = fmt.Sprintf("The nearest %s is probably at %s", query, placeName)
 	}
-	if strings.Contains(s, "where should i eat") {
+	if strings.Contains(s, "where should i eat") || strings.Contains(s, "what should i eat") {
 		query := randomFoodType()
 		placeName = queryGoogleMaps(query, b, maps.RankByDistance)
 		attempts := 0
@@ -157,10 +158,9 @@ func (b *Bot) Parse(s string) string {
 			placeName = queryGoogleMaps(query, b, maps.RankByDistance)
 			attempts++
 		}
-		response = fmt.Sprintf("Why not try %s?", placeName)
-	}
-	if placeName == "" {
-		response = "Sorry, I couldn't find anything!"
+		if placeName != "" {
+			response = fmt.Sprintf("Why not try %s?", placeName)
+		}
 	}
 	return response
 }
