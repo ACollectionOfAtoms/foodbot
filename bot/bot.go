@@ -151,7 +151,6 @@ func (b *Bot) Parse(s string) string {
 		attempts := 0
 		for placeName == "" {
 			if attempts == 3 {
-				response = "Uh not sure... ask me again?"
 				break
 			}
 			query = randomFoodType()
