@@ -138,12 +138,12 @@ func (b *Bot) Parse(s string) string {
 	if strings.Contains(s, "the best") {
 		query := parseTheBest(s)
 		placeName = queryGoogleMaps(query, b, maps.RankByProminence)
-		response = fmt.Sprintf("I'd say the best %s, is at %s", query, placeName)
+		response = fmt.Sprintf("I'd say the best %s is at %s", query, placeName)
 	}
 	if strings.Contains(s, "nearest") {
 		query := parseNearest(s)
 		placeName = queryGoogleMaps(query, b, maps.RankByDistance)
-		response = fmt.Sprintf("The nearest %s, is probably at %s", query, placeName)
+		response = fmt.Sprintf("The nearest %s is probably at %s", query, placeName)
 	}
 	if strings.Contains(s, "where should i eat") {
 		query := randomFoodType()
