@@ -23,7 +23,7 @@ func googleMapsClient(apiKey string) *maps.Client {
 	return c
 }
 
-func main() {
+func botMaster() {
 	var BotID string
 	// the string here is a channel ID lmao (fix this to be more explicit)
 	bots := make(map[string]*bot.Bot)
